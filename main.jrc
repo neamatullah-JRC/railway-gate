@@ -1,0 +1,74 @@
+#include <Servo.h>
+#include <LiquidCrystal.h>
+Servo myservo;
+
+
+LiquidCrystal lcd(A4, A3, A2, A1, A0, 12);
+
+#define sensora 6
+#define sensorb 7
+
+
+#define TRIGGER1 2
+#define TRIGGER2 4
+
+#define ECHO1 5
+#define ECHO2 3
+
+long distance1=0; 
+long distance2=0;
+
+
+
+
+long measure(int trigger, int echo){
+  long duration = 0;
+  digitalWrite(trigger, LOW);  
+  delay(5); 
+  digitalWrite(trigger, HIGH); 
+  delay(10);
+  digitalWrite(trigger, LOW);
+  duration = pulseIn(echo, HIGH,11662); 
+  return (duration/2) * 0.03432; 
+}
+
+void setup() {
+   lcd.begin(16, 2);
+  pinMode(sensora, INPUT_PULLUP);
+  pinMode(sensorb, INPUT_PULLUP);
+   myservo.attach(9);
+  pinMode(TRIGGER1, OUTPUT); 
+  pinMode(ECHO1, INPUT); 
+  pinMode(TRIGGER2, OUTPUT); 
+  pinMode(ECHO2, INPUT); 
+
+}
+
+void loop() {
+  
+ distance1 = measure(TRIGGER1, ECHO1);
+ distance2 = measure(TRIGGER2, ECHO2);
+ int sena = digitalRead(sensora);
+ int senb = digitalRead(sensorb);
+
+ 
+ lcd.setCursor(0, 0);
+ lcd.print("size a :");
+ lcd.setCursor(10, 1);
+ lcd.print(distance1);
+ lcd.setCursor(0, 1);
+ lcd.print("size a :");
+ lcd.setCursor(10, 1);
+ lcd.print(distance1);
+ 
+  if(sena == 0 && distance1 < 5)
+  {
+       myservo.write(90);
+  }else if(senb == 0 && distance2 < 5)
+  {
+     myservo.write(90);
+  }else{
+     myservo.write(0);
+    }
+
+}
