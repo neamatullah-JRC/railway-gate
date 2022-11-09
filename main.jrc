@@ -23,7 +23,8 @@ long distance2 = 0;
 int leftst = 0;
 int rightst = 0;
 
-
+uint16_t duration = 0;
+uint32_t interval = 0;
 
 long measure(int trigger, int echo) {
   long duration = 0;
@@ -38,9 +39,12 @@ long measure(int trigger, int echo) {
 
 void setup() {
   lcd.begin(16, 2);
+  Serial.begin(9600);
   pinMode(sensora, INPUT_PULLUP);
   pinMode(sensorb, INPUT_PULLUP);
   myservo.attach(9);
+  myservo.write(0);
+
   pinMode(TRIGGER1, OUTPUT);
   pinMode(ECHO1, INPUT);
   pinMode(TRIGGER2, OUTPUT);
@@ -50,49 +54,49 @@ void setup() {
 
 void loop() {
 
+  lcd.setCursor(0, 0);
+  lcd.print("size a :");
+  lcd.setCursor(10, 0);
+  lcd.print(distance1);
+  lcd.setCursor(0, 1);
+  lcd.print("size b :");
+  lcd.setCursor(10, 1);
+  lcd.print(distance2);
   distance1 = measure(TRIGGER1, ECHO1);
   distance2 = measure(TRIGGER2, ECHO2);
   int sena = digitalRead(sensora);
   int senb = digitalRead(sensorb);
 
-
-  lcd.setCursor(0, 0);
-  lcd.print("size a :");
-  lcd.setCursor(10, 1);
-  lcd.print(distance1);
-  lcd.setCursor(0, 1);
-  lcd.print("size a :");
-  lcd.setCursor(10, 1);
-  lcd.print(distance1);
-
   if (sena == 0 && distance1 < 5 && senb == 1 && leftst == 0 && rightst == 0)
   {
     leftst = 1;
 
-  } else if (senb == 0 && distance2 < 5 && sena == 1&& leftst == 1 && rightst == 0)
+  } else if (senb == 0 && distance2 < 5 && sena == 1 && leftst == 1 && rightst == 0)
   {
     leftst = 0;
-  } else if (senb == 0 && distance2 < 5 && sena == 1&& leftst == 0 && rightst == 0)
+  } else if (senb == 0 && distance2 < 5 && sena == 1 && leftst == 0 && rightst == 0)
   {
     rightst = 1;
-  }else if (sena == 0 && distance1 < 5 && senb == 1&& leftst == 0 && rightst == 1)
+  } else if (sena == 0 && distance1 < 5 && senb == 1 && leftst == 0 && rightst == 1)
   {
     rightst = 0;
-  }else 
-  {
-     leftst = 0;
-     rightst = 0;  
   }
-  if(leftst == 1 || rightst == 1)
+  if (leftst == 1 || rightst == 1)
   {
     myservo.write(90);
-    
-    lcd.print("open");
-  }else
-  {
-     myservo.write(0); 
-   
-   
-  }
+    lcd.clear();
+    lcd.setCursor(13, 0);
+    lcd.print("L");
 
+  } else
+  {
+    myservo.write(0);
+    lcd.clear();
+    lcd.setCursor(13, 1);
+    lcd.print("C");
+  }
+Serial.print("leftst");
+Serial.print(leftst);
+Serial.print("rightst");
+Serial.println(rightst);
 }
