@@ -1,0 +1,110 @@
+#include <Servo.h>
+#include <LiquidCrystal.h>
+Servo myservo;
+
+
+LiquidCrystal lcd(A4, A3, A2, A1, A0, 12);
+
+#define sensora 6
+#define sensorb 7
+
+
+#define TRIGGER1 2
+#define ECHO1 3
+
+
+#define TRIGGER2 4
+#define ECHO2 5
+
+long distance1 = 0;
+long distance2 = 0;
+
+
+int leftst = 0;
+int rightst = 0;
+
+uint16_t duration = 0;
+uint32_t interval = 0;
+
+long measure(int trigger, int echo) {
+  long duration = 0;
+  digitalWrite(trigger, LOW);
+  delay(5);
+  digitalWrite(trigger, HIGH);
+  delay(10);
+  digitalWrite(trigger, LOW);
+  duration = pulseIn(echo, HIGH, 11662);
+  return (duration / 2) * 0.03432;
+}
+
+void setup() {
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+  pinMode(sensora, INPUT_PULLUP);
+  pinMode(sensorb, INPUT_PULLUP);
+  myservo.attach(9);
+  myservo.write(0);
+
+  pinMode(TRIGGER1, OUTPUT);
+  pinMode(ECHO1, INPUT);
+  pinMode(TRIGGER2, OUTPUT);
+  pinMode(ECHO2, INPUT);
+
+}
+
+void loop() {
+
+  lcd.setCursor(0, 0);
+  lcd.print("Height L :");
+  lcd.setCursor(10, 0);
+  lcd.print(distance1+8);
+  lcd.setCursor(0, 1);
+  lcd.print("Height R :");
+  lcd.setCursor(10, 1);
+  lcd.print(distance2+8);
+  distance1 = measure(TRIGGER1, ECHO1);
+  distance2 = measure(TRIGGER2, ECHO2);
+  int sena = digitalRead(sensora);
+  int senb = digitalRead(sensorb);
+
+  if (sena == 0 && senb == 1 && distance1 < 5)
+  {
+   myservo.write(90);
+    lcd.clear();
+    lcd.setCursor(13, 0);
+    lcd.print("L");
+    lcd.setCursor(0, 0);
+    lcd.print("Train Detected:");
+    lcd.setCursor(0, 1);
+    lcd.print("Left Side");
+    delay(5000);
+  }  
+  
+  
+  
+   if (senb == 0 && sena == 1 && distance2 < 5) {
+     myservo.write(90);
+    lcd.clear();
+    lcd.setCursor(13, 0);
+    lcd.print("R");
+    lcd.setCursor(0, 0);
+    lcd.print("Train Detected:");
+    lcd.setCursor(0, 1);
+    lcd.print("Right Side");
+   delay(5000);
+  }  else
+  {
+   
+    myservo.write(0);
+    lcd.clear();
+    lcd.setCursor(13, 1);
+    lcd.print("C");
+  
+  } 
+
+  Serial.println("leftst");
+  Serial.println(leftst);
+  Serial.println("rightst");
+  Serial.println(rightst);
+//delay(200);
+}
